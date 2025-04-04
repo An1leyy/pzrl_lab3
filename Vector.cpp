@@ -9,7 +9,7 @@ Vector::Vector(const ValueType& value, size_t size) : _size(size), _capacity((si
         _data[i] = value;
     }
 }
-Vector::Vector(const ValueType* rawArray, const size_t size, float coef) : _size(size), _capacity(static_cast<int>(size * coef))
+Vector::Vector(const ValueType* rawArray, const size_t size, float coef) : _size(size), _capacity(static_cast<int>(size * coef)), _multiplicativeCoef(coef)
 {
     if (rawArray != nullptr)
     {
@@ -40,7 +40,7 @@ Vector& Vector::operator=(const Vector& other)
     }
     return *this;
 }
-Vector::Vector(Vector&& other) noexcept : _data(other._data), _size(other._size), _capacity(other._size)
+Vector::Vector(Vector&& other) noexcept : _data(other._data), _size(other._size), _capacity(other._capacity)
 {
     other._data = nullptr;
     other._size = 0;
@@ -77,6 +77,7 @@ void Vector::pushBack(const ValueType& value)
 }
 void Vector::pushFront(const ValueType& value)
 {
+    if (_capacity == 0) { _capacity = _multiplicativeCoef; }
     if (_size == _capacity) { _capacity *= _multiplicativeCoef; }
     ValueType *temp = new ValueType[_capacity];
     for (size_t i = 1; i < _size + 1; i++)
