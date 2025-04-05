@@ -9,7 +9,7 @@ Vector::Vector(const ValueType& value, size_t size) : _size(size), _capacity((si
         _data[i] = value;
     }
 }
-Vector::Vector(const ValueType* rawArray, const size_t size, float coef) : _size(size), _capacity(static_cast<int>(size * coef)), _multiplicativeCoef(coef)
+Vector::Vector(const ValueType* rawArray, const size_t size, float coef) : _size(size), _capacity(size), _multiplicativeCoef(coef)
 {
     if (rawArray != nullptr)
     {
@@ -32,7 +32,7 @@ Vector& Vector::operator=(const Vector& other)
 {
     if (this == &other) { return *this; }
     _size = other._size;
-    _capacity = _size;
+    _capacity = other._size;
     _data = new ValueType[_capacity];
     for (size_t i = 0; i < _size; i++)
     {
@@ -77,15 +77,29 @@ void Vector::pushBack(const ValueType& value)
 }
 void Vector::pushFront(const ValueType& value)
 {
-    if (_capacity == 0) { _capacity = _multiplicativeCoef; }
-    if (_size == _capacity) { _capacity *= _multiplicativeCoef; }
-    ValueType *temp = new ValueType[_capacity];
-    for (size_t i = 1; i < _size + 1; i++)
+    if (_capacity == 0)
     {
-        temp[i] = _data[i - 1];
+        _capacity = _multiplicativeCoef;
+        _data = new ValueType[_capacity];
     }
-    delete[] _data;
-    _data = temp;
+    if (_size == _capacity)
+    {
+        _capacity *= _multiplicativeCoef;
+        ValueType *temp = new ValueType[_capacity];
+        for (size_t i = 1; i < _size + 1; i++)
+        {
+            temp[i] = _data[i - 1];
+        }
+        delete[] _data;
+        _data = temp;
+    }
+    else
+    {
+        for (size_t i = _size; i > 0; i--)
+        {
+            _data[i] = _data[i - 1];
+        }
+    }
     _data[0] = value;
     _size++;
 }
@@ -190,29 +204,21 @@ void Vector::popBack()
 {
     if (_size > 0)
     {
-        ValueType *temp = new ValueType[_capacity];
-        for (size_t i = 0; i < _size - 1; i++)
-        {
-            temp[i] = _data[i];
-        }
-        delete[] _data;
-        _data = temp;
         _size--;
     }
+    else { throw std::length_error("Vector is empty, nothing to delete"); }
 }
 void Vector::popFront()
 {
     if (_size > 0)
     {
-        ValueType *temp = new ValueType[_capacity];
         for (size_t i = 1; i < _size; i++)
         {
-            temp[i - 1] = _data[i];
+            _data[i - 1] = _data[i];
         }
-        delete[] _data;
-        _data = temp;
         _size--;
     }
+    else { throw std::length_error("Vector is empty, nothing to delete"); }
 }
 void Vector::erase(size_t pos, size_t count)
 {
